@@ -78,26 +78,26 @@
 
 .lonely {
   position: absolute;
-  bottom: -5vh;
+  bottom: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(5%);
   margin: 0;
   line-height: 0.85;
   letter-spacing: 0;
-  color: #000000;
+  color: #101010;
   font-family: "Satoshi Variable", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
-  font-size: clamp(200px, 25vw, 500px);
+  font-size: max(250px, 32vw);
   font-weight: 900;
   -webkit-text-stroke: 2px #ffffff;
   paint-order: stroke fill;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 @media (max-width: 767px) {
   .footer {
     width: 100vw;
-    min-height: 100vh;
-    height: auto;
+    height: 100vh;
     padding: 80px 24px 120px;
     justify-content: flex-start;
   }
@@ -134,16 +134,15 @@
   }
 
   .lonely {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    transform: none;
-    width: auto;
-    height: auto;
-    margin-top: 40px;
-    font-size: clamp(120px, 30vw, 280px);
-    line-height: 1;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(5%);
+    font-size: clamp(100px, 28vw, 180px);
+    line-height: 0.85;
+    color: #101010;
     -webkit-text-stroke: 1px #ffffff;
-    order: 2;
+    paint-order: stroke fill;
+    margin: 0;
   }
 }

@@ -56,7 +56,7 @@ export default function Gallery() {
   return (
     <div className={styles.gallery2}>
       <p className={styles.gallery}>Gallery</p>
-      <div className={styles.autoWrapper}>
+      <div className={styles.autoWrapper} data-slot-gallery>
         {items.map((item, index) => {
           const bgImage = item.name
             ? `linear-gradient(0deg, #000000cc 11.53%, #66666600 32.99%), url(/images/${item.file})`
@@ -81,7 +81,7 @@ export default function Gallery() {
 
       {/* 灯箱 */}
       {isOpen && currentItem && (
-        <div className={styles.lightbox} onClick={() => setLightboxIndex(null)}>
+        <div className={styles.lightbox} data-slot-lightbox onClick={() => setLightboxIndex(null)}>
           <button
             className={styles.lightboxClose}
             onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}

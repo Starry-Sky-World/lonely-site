@@ -32,6 +32,8 @@
   overflow-y: hidden;
   flex-wrap: nowrap;
   scrollbar-width: none;
+  /* 允许横向触摸滚动，纵向交给拨码轮 */
+  touch-action: pan-x;
 }
 
 .autoWrapper::-webkit-scrollbar {
@@ -199,8 +201,7 @@
 @media (max-width: 767px) {
   .gallery2 {
     width: 100vw;
-    min-height: 100vh;
-    height: auto;
+    height: 100vh;
     padding: 40px 20px 60px;
     align-items: center;
   }

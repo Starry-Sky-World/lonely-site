@@ -21,12 +21,20 @@ export default function Landing() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [animDone, setAnimDone] = useState(false);
 
-  // 预加载背景图片
+  // 预加载背景图片 + 超时兜底（防止图片加载失败导致永久黑屏/锁死）
   useEffect(() => {
     const img = new Image();
     img.onload = () => setImageLoaded(true);
     img.src = '/images/landing-bg.png';
-    return () => { img.onload = null; };
+
+    // 3.5 秒超时：无论图片是否加载完成、动画是否播完，强制就绪
+    // 避免用户被永久锁在黑屏 Landing 上
+    const timeout = setTimeout(() => {
+      setImageLoaded(true);
+      setAnimDone(true);
+    }, 3500);
+
+    return () => { img.onload = null; clearTimeout(timeout); };
   }, []);
 
   // 词汇动画
@@ -71,6 +79,11 @@ export default function Landing() {
       duration: 1.5,
       ease: 'power2.inOut',
       delay: 0.2,
+      onStart: () => {
+        // 通知拨码轮：Landing 已就绪，可以允许滚动了
+        // 防止用户在黑屏期间滚动导致黑屏切换
+        window.dispatchEvent(new CustomEvent('landing-ready'));
+      },
     });
   }, [imageLoaded, animDone]);
 
