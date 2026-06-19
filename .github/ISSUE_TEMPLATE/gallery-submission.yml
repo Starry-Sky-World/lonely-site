@@ -1,0 +1,34 @@
+name: 📷 图片提交
+description: 向站点画廊提交图片（支持多张，标题写在图片 alt 里）
+title: "[Gallery] "
+labels: ["gallery-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢分享图片！提交后会有机器人自动创建 Pull Request 将图片加入画廊。
+
+        **如何提交：**
+        - 直接粘贴或拖入图片即可，可一次提交多张
+        - **标题写在图片的替代文本里**：`![这是标题](图片链接)` → 带标题
+        - 不需要标题则留空 alt：`![](图片链接)` → 仅展示图片
+
+        > 提示：在 GitHub Issue 编辑器里粘贴图片会自动生成 `![](...)` 语法，
+        > 在方括号 `[]` 中填入标题即可。
+
+  - type: textarea
+    id: images
+    attributes:
+      label: 图片
+      description: 添加一张或多张图片，标题写在 alt 文本里。
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注（可选）
+      description: 任何补充说明。
+    validations:
+      required: false
