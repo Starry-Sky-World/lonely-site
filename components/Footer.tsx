@@ -29,7 +29,7 @@ export default function Footer() {
               rel={item.url.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
               className={styles.frame2}
             >
-              <img src={`/icons/${item.icon}.svg`} className={styles.mail} alt={item.icon} />
+              <img src={`/icons/${item.icon}.svg`} className={styles.mail} alt={item.icon} loading="lazy" decoding="async" />
               <span className={styles.contactText}>{item.name}</span>
             </a>
           ))}

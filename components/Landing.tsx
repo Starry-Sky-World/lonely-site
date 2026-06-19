@@ -52,14 +52,25 @@ export default function Landing() {
       tl.fromTo(
         titleWords,
         { opacity: 0, filter: 'blur(20px)', y: 60 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out' }
+        {
+          opacity: 1, filter: 'blur(0px)', y: 0, duration: 1.2, stagger: 0.2, ease: 'power3.out',
+          onComplete: () => {
+            // 动画完成后移除 will-change，释放 GPU 层
+            titleWords.forEach((w: Element) => (w as HTMLElement).style.willChange = 'auto');
+          },
+        }
       );
 
       // Subtitle: 标题动画后开始，参数稍小以适配较小字号
       tl.fromTo(
         subtitleWords,
         { opacity: 0, filter: 'blur(15px)', y: 40 },
-        { opacity: 1, filter: 'blur(0px)', y: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out' },
+        {
+          opacity: 1, filter: 'blur(0px)', y: 0, duration: 0.8, stagger: 0.08, ease: 'power3.out',
+          onComplete: () => {
+            subtitleWords.forEach((w: Element) => (w as HTMLElement).style.willChange = 'auto');
+          },
+        },
         '-=0.5'
       );
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import styles from './Gallery.module.css';
 import settings from '@/settings.json';
 
@@ -8,6 +8,51 @@ type GalleryItem = {
   name?: string;
   file: string;
 };
+
+/**
+ * 单个 Gallery 卡片
+ * - 独立跟踪图片加载状态，未加载完成时显示骨架屏
+ * - hover 时放大图片（容器不变，overflow 裁剪）
+ */
+function GalleryCard({
+  item,
+  index,
+  onClick,
+}: {
+  item: GalleryItem;
+  index: number;
+  onClick: () => void;
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div
+      className={`${styles.galleryItem} ${item.name ? styles.withName : ''} ${styles.clickable}`}
+      onClick={onClick}
+    >
+      {/* 骨架屏：图片未加载完成时显示 */}
+      {!loaded && <div className={styles.skeleton} />}
+
+      {/* 图片：加载完成后才显示 */}
+      <img
+        className={`${styles.cardImg} ${loaded ? styles.cardImgLoaded : ''}`}
+        src={`/images/${item.file}`}
+        alt={item.name || ''}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setLoaded(true)}
+      />
+
+      {/* 有标题时的渐变遮罩 + 标题 */}
+      {item.name && loaded && (
+        <>
+          <div className={styles.overlay} />
+          <p className={styles.itemTitle}>{item.name}</p>
+        </>
+      )}
+    </div>
+  );
+}
 
 /**
  * Gallery - 基于 settings.json 动态渲染
@@ -18,9 +63,56 @@ type GalleryItem = {
 export default function Gallery() {
   const items = settings.gallery as GalleryItem[];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const isOpen = lightboxIndex !== null;
   const currentItem = isOpen ? items[lightboxIndex!] : null;
+
+  // 横向滚动惯性：鼠标滚轮（垂直）转为横向滚动 + rAF 缓动减速
+  // 触摸板横向滚动（deltaX）保留原生惯性
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let target = el.scrollLeft;
+    let current = el.scrollLeft;
+    let rafId = 0;
+
+    const animate = () => {
+      current += (target - current) * 0.12;
+      el.scrollLeft = current;
+      if (Math.abs(target - current) > 0.5) {
+        rafId = requestAnimationFrame(animate);
+      } else {
+        current = target;
+        el.scrollLeft = target;
+        rafId = 0;
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      // 触摸板横向滚动走原生（已有惯性）
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      // 从当前位置开始累积目标
+      if (!rafId) {
+        current = el.scrollLeft;
+        target = el.scrollLeft;
+      }
+      target += e.deltaY;
+      const max = el.scrollWidth - el.clientWidth;
+      target = Math.max(0, Math.min(max, target));
+      if (!rafId) {
+        rafId = requestAnimationFrame(animate);
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   // 键盘事件：ESC 关闭，左右箭头切换
   useEffect(() => {
@@ -56,27 +148,19 @@ export default function Gallery() {
   return (
     <div className={styles.gallery2}>
       <p className={styles.gallery}>Gallery</p>
-      <div className={styles.autoWrapper} data-slot-gallery>
-        {items.map((item, index) => {
-          const bgImage = item.name
-            ? `linear-gradient(0deg, #000000cc 11.53%, #66666600 32.99%), url(/images/${item.file})`
-            : `url(/images/${item.file})`;
-
-          return (
-            <div
-              key={index}
-              className={`${styles.galleryItem} ${item.name ? styles.withName : ''} ${styles.clickable}`}
-              style={{ backgroundImage: bgImage }}
-              onClick={() => setLightboxIndex(index)}
-            >
-              {item.name && <p className={styles.itemTitle}>{item.name}</p>}
-            </div>
-          );
-        })}
+      <div ref={scrollRef} className={styles.autoWrapper} data-slot-gallery>
+        {items.map((item, index) => (
+          <GalleryCard
+            key={index}
+            item={item}
+            index={index}
+            onClick={() => setLightboxIndex(index)}
+          />
+        ))}
       </div>
       <div className={styles.autoWrapper2}>
         <p className={styles.scrollRight}>Scroll right</p>
-        <img src="/icons/arrow-right.svg" className={styles.arrowRight} alt="Scroll right" />
+        <img src="/icons/arrow-right.svg" className={styles.arrowRight} alt="Scroll right" loading="lazy" />
       </div>
 
       {/* 灯箱 */}

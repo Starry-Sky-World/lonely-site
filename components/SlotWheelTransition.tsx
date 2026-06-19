@@ -327,7 +327,7 @@ export default function SlotWheelTransition({ children }: SlotWheelTransitionPro
           ref={(el) => {
             sectionsRef.current[index] = el;
           }}
-          className={styles.section}
+          className={`${styles.section} ${index !== 0 ? 'skipWhenOffscreen' : ''}`}
         >
           {block}
         </div>

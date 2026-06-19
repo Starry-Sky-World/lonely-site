@@ -38,7 +38,7 @@
 /* 逐词动画的单词容器：inline-block 使 transform/filter 生效 */
 .word {
   display: inline-block;
-  will-change: transform, filter, opacity;
+  /* will-change 由 GSAP 动画期间动态设置，动画后清除，避免常驻 GPU 层 */
 }
 
 .title2 {
