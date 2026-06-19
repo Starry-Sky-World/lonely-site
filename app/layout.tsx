@@ -12,10 +12,10 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Lonely — Take picture, write code and design product.",
   description:
-    "Lonely 的个人主页：摄影作品、代码与设计。Hello, I'm Lonely.",
+    "Lonely の Profile！",
   openGraph: {
     title: "Lonely — Take picture, write code and design product.",
-    description: "Lonely 的个人主页：摄影作品、代码与设计。",
+    description: "泥嚎。",
     type: "website",
   },
 };
