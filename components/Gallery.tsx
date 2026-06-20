@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import gsap from 'gsap';
 import styles from './Gallery.module.css';
 import settings from '@/settings.json';
 
@@ -61,27 +63,32 @@ function GalleryCard({
  * - name: 可选，有则添加标题+遮罩层，无则只显示图片
  * - 点击图片打开灯箱，支持 ESC 关闭、左右箭头切换
  */
-export default function Gallery() {
-  const items = settings.gallery as GalleryItem[];
+export default function Gallery({ limit }: { limit?: number }) {
+  const allItems = settings.gallery as GalleryItem[];
+  const items = limit ? allItems.slice(0, limit) : allItems;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const hoverCardRef = useRef<HTMLElement | null>(null);
+  const galleryLinkRef = useRef<HTMLAnchorElement>(null);
 
   const isOpen = lightboxIndex !== null;
   const currentItem = isOpen ? items[lightboxIndex!] : null;
 
-  // 悬停跟踪：鼠标在容器内移动时，只对当前卡片触发放大 class
+  // 悬停跟踪：用 mouseover/mouseout 事件委托（低频，只在进入/离开元素时触发）
   // 经过卡片间 gap 时保持上一张卡片状态，避免 hover 频繁切换造成卡顿
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+  const handleMouseOver = useCallback((e: React.MouseEvent) => {
     const target = (e.target as HTMLElement).closest<HTMLElement>('[data-gallery-card]');
-    if (!target) return; // 在 gap 中，保持当前状态
-    if (target === hoverCardRef.current) return; // 同一卡片，不操作
+    if (!target || target === hoverCardRef.current) return;
     if (hoverCardRef.current) hoverCardRef.current.classList.remove(styles.hovering);
     target.classList.add(styles.hovering);
     hoverCardRef.current = target;
   }, []);
 
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseOut = useCallback((e: React.MouseEvent) => {
+    // relatedTarget 仍在某卡片内 → 交给 mouseover 处理
+    const related = e.relatedTarget as HTMLElement | null;
+    if (related && related.closest('[data-gallery-card]')) return;
+    // 离开容器或进入 gap 区域 → 清除
     if (hoverCardRef.current) {
       hoverCardRef.current.classList.remove(styles.hovering);
       hoverCardRef.current = null;
@@ -134,6 +141,25 @@ export default function Gallery() {
     };
   }, []);
 
+  // "Go to gallery" 下划线 + 箭头 hover 动画
+  const handleLinkEnter = useCallback(() => {
+    const el = galleryLinkRef.current;
+    if (!el) return;
+    const underline = el.querySelector(`.${styles.linkUnderline}`) as HTMLElement | null;
+    const arrow = el.querySelector(`.${styles.arrowRight}`) as HTMLElement | null;
+    if (underline) gsap.to(underline, { scaleX: 1, duration: 0.4, ease: 'power2.out' });
+    if (arrow) gsap.to(arrow, { x: 8, duration: 0.4, ease: 'power2.out' });
+  }, []);
+
+  const handleLinkLeave = useCallback(() => {
+    const el = galleryLinkRef.current;
+    if (!el) return;
+    const underline = el.querySelector(`.${styles.linkUnderline}`) as HTMLElement | null;
+    const arrow = el.querySelector(`.${styles.arrowRight}`) as HTMLElement | null;
+    if (underline) gsap.to(underline, { scaleX: 0, duration: 0.3, ease: 'power2.in', transformOrigin: 'right center' });
+    if (arrow) gsap.to(arrow, { x: 0, duration: 0.3, ease: 'power2.in' });
+  }, []);
+
   // 键盘事件：ESC 关闭，左右箭头切换
   useEffect(() => {
     if (!isOpen) return;
@@ -169,7 +195,7 @@ export default function Gallery() {
     <div className={styles.gallery2}>
       <p className={styles.gallery}>Gallery</p>
       <div ref={scrollRef} className={styles.autoWrapper} data-slot-gallery
-        onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
+        onMouseOver={handleMouseOver} onMouseOut={handleMouseOut}>
         {items.map((item, index) => (
           <GalleryCard
             key={index}
@@ -179,10 +205,18 @@ export default function Gallery() {
           />
         ))}
       </div>
-      <div className={styles.autoWrapper2}>
-        <p className={styles.scrollRight}>Scroll right</p>
-        <img src="/icons/arrow-right.svg" className={styles.arrowRight} alt="Scroll right" loading="lazy" />
-      </div>
+      {limit && (
+        <div className={styles.autoWrapper2}>
+          <Link ref={galleryLinkRef} href="/gallery" className={styles.galleryLink}
+            onMouseEnter={handleLinkEnter} onMouseLeave={handleLinkLeave}>
+            <span className={styles.galleryLinkText}>
+              Go to gallery
+              <span className={styles.linkUnderline} />
+            </span>
+            <img src="/icons/arrow-right.svg" className={styles.arrowRight} alt="" loading="lazy" />
+          </Link>
+        </div>
+      )}
 
       {/* 灯箱 */}
       {isOpen && currentItem && (

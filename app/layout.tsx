@@ -13,6 +13,7 @@ export const metadata: Metadata = {
   title: "Lonely — Take picture, write code and design product.",
   description:
     "Lonely の Profile！",
+  manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Lonely — Take picture, write code and design product.",
     description: "泥嚎。",
@@ -33,6 +34,10 @@ export default function RootLayout({
           href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,700,800,900&f[]=boska@400,700,900&f[]=satoshi@400,500,700,900&display=swap"
           rel="stylesheet"
         />
+        {/* PWA */}
+        <meta name="theme-color" content="#101010" />
+        <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icons/icon.svg" />
       </head>
       <body className="bg-ink text-white font-inter antialiased">
         {children}
